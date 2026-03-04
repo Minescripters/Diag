@@ -7,7 +7,8 @@
 # https://github.com/Minescripters/PyPyj
 #
 
-from system.pyj.minescript import JavaClass, version_info, execute, echo_json, set_timeout
+from system.pyj.minescript import version_info, execute, echo_json, set_timeout
+import sys
 
 File = JavaClass("java.io.File")
 Scanner = JavaClass("java.util.Scanner")
@@ -26,6 +27,7 @@ except:  # noqa: E722
     # Just exit, or try to File = JavaClass("java.io.File") for full 5.0 support??
 
 
+
 _ver: str = "1.0.0"
 
 root_dir: str = "minescript"
@@ -35,7 +37,14 @@ text_color: str = "white"
 key_color: str = "gray"
 value_color: str = "blue"
 log_file: str = root_dir + "/diag_report.log"
-LOG: bool = True
+
+LOG: bool = False
+
+for var in sys.argv:
+    if var.startswith("log="):
+        LOG = "True" in var or "true" in var
+
+
 
 vf = version_info()
 mc_ver: str = vf.minecraft
@@ -54,7 +63,10 @@ def open_log_file(filename: str=log_file, appends: bool=False):
         print("Error writing to log file: " + e.getMessage())
 
 def close_log_file():
+    if not LOG:
+        return
     bufferedWriter.close()
+    echo_json("{\"text\": \"Log File Saved! \", \"color\": \"yellow\"}")
     
 def log2file(text: str):
     try:
@@ -198,5 +210,7 @@ set_timeout(lambda: libs(), 500)
 # Show Config (config.txt)
 #set_timeout(lambda: execute("\config"), 500)
 set_timeout(lambda: show_config(), 500)
+
+set_timeout(lambda: close_log_file(), 1000)
 
 set_timeout(lambda: close_log_file(), 1000)
